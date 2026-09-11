@@ -36,12 +36,28 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-## Quickstart (Month 1 deliverable)
+## Quickstart (full MVP pipeline)
 
 ```bash
-python -m src.ingestion.generate_synthetic_data
-python -m src.nlp.skill_extractor
+python -m src.ingestion.generate_synthetic_data   # job postings + student profiles
+python -m src.nlp.skill_extractor                 # NLP skill extraction (NER)
+python -m src.features.build_feature_store        # market demand + per-student skill gaps
+python -m src.models.train_classifier              # placement-probability classifier
+streamlit run src/dashboard/app.py                  # skill-gap dashboard
 ```
 
-This generates synthetic job postings + student profiles under `data/raw/`, then
-extracts skills from every posting and writes `data/processed/job_postings_skills.csv`.
+Run in order — each step reads the previous step's output from `data/`:
+
+| Step | Script | Produces |
+|---|---|---|
+| 1 | `src.ingestion.generate_synthetic_data` | `data/raw/job_postings/job_postings.csv`, `data/raw/students/students.csv` |
+| 2 | `src.nlp.skill_extractor` | `data/processed/job_postings_skills.csv` |
+| 3 | `src.features.build_feature_store` | `data/processed/market_skill_demand.csv`, `data/processed/student_skill_gaps.csv` |
+| 4 | `src.models.train_classifier` | `data/processed/placement_model.joblib`, `data/processed/model_metrics.json` |
+| 5 | `src.dashboard.app` | Streamlit UI at `localhost:8501` |
+
+## Tests
+
+```bash
+pytest tests/
+```

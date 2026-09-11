@@ -7,7 +7,14 @@ this order — each one is optional but builds on the last.
 
 ---
 
-## 1. Swap in a real Kaggle dataset (do this first — highest value, lowest effort)
+## 1. Swap in a real Kaggle dataset — ✅ DONE
+
+Used `benroshan/factors-affecting-campus-placement` (real academic + placement
+outcomes) and `arshkon/linkedin-job-postings` (real postings, 1500-row sample).
+See the README's "Using real Kaggle data" section and
+`src/ingestion/load_kaggle_data.py`. Result: classifier AUC went from 0.66
+(synthetic) to 0.947 (real). The steps below are kept for reference / in case
+you want a different or additional dataset.
 
 Why first: your classifier and skill taxonomy are currently validated only
 against data you generated yourself. A real dataset is what makes the report

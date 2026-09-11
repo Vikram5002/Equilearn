@@ -36,7 +36,7 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
-## Quickstart (full MVP pipeline)
+## Quickstart (full MVP pipeline, synthetic data)
 
 ```bash
 python -m src.ingestion.generate_synthetic_data   # job postings + student profiles
@@ -55,6 +55,33 @@ Run in order — each step reads the previous step's output from `data/`:
 | 3 | `src.features.build_feature_store` | `data/processed/market_skill_demand.csv`, `data/processed/student_skill_gaps.csv` |
 | 4 | `src.models.train_classifier` | `data/processed/placement_model.joblib`, `data/processed/model_metrics.json` |
 | 5 | `src.dashboard.app` | Streamlit UI at `localhost:8501` |
+
+## Using real Kaggle data instead of synthetic
+
+The pipeline has been validated end-to-end on real data too (AUC 0.947 vs.
+0.66 on synthetic). To reproduce:
+
+```bash
+pip install kaggle
+# Get a token at kaggle.com/settings -> "API" -> Generate New Token, then:
+echo 'export KAGGLE_API_TOKEN="<your token>"' > .env   # gitignored, never commit this
+
+kaggle datasets download -d benroshan/factors-affecting-campus-placement -p data/external --unzip
+kaggle datasets download -d arshkon/linkedin-job-postings -p data/external/linkedin_job_postings --unzip
+
+set -a && source .env && set +a   # or: $env:KAGGLE_API_TOKEN="..." on PowerShell
+python -m src.ingestion.load_kaggle_data   # overwrites data/raw/ with real data
+python -m src.nlp.skill_extractor
+python -m src.features.build_feature_store
+python -m src.models.train_classifier
+streamlit run src/dashboard/app.py
+```
+
+Note: the campus-placement dataset has no skills field, so student skills are
+*imputed* from degree/specialisation (see `SPECIALISATION_SKILLS`/`DEGREE_SKILLS`
+in `src/ingestion/load_kaggle_data.py`) — call this out in your report as a
+proxy, not observed data. Everything else (CGPA proxy, placement outcome,
+job posting descriptions) is real.
 
 ## Tests
 

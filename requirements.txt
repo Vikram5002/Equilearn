@@ -1,0 +1,31 @@
+# Core
+pandas
+numpy
+pyarrow
+
+# NLP (skill extraction) - spaCy instead of Spark NLP: same NER concepts,
+# no JVM/licensing overhead, runs reliably on a laptop for a solo 4-month build.
+spacy
+
+# Distributed processing (local mode - no EMR/cluster cost)
+pyspark
+delta-spark
+
+# ML
+scikit-learn
+xgboost
+joblib
+
+# Dashboard
+streamlit
+plotly
+
+# Orchestration (stretch goal, Month 2+)
+# apache-airflow  # install separately via Docker - heavy dependency tree
+
+# AWS (Month 4 - only when we actually push to S3)
+boto3
+
+# Dev
+pytest
+python-dotenv

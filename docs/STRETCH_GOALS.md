@@ -47,7 +47,31 @@ credible.
 
 ---
 
-## 2. Airflow orchestration (Month 2 stretch)
+## 2. Airflow orchestration — ✅ DONE
+
+Set up under `infra/airflow/`, DAG `skillbridge_pipeline`
+(`ingest_data >> extract_skills >> build_feature_store >> train_classifier`).
+Deviated from the plan below in two ways, both documented in the commit that
+added this:
+- **LocalExecutor instead of CeleryExecutor** — the official CeleryExecutor
+  compose template hit a reproducible Celery/Docker-Desktop-on-Windows bug
+  (worker hostname resolution crash loop). LocalExecutor has no such issue
+  and this DAG doesn't need distributed workers at this scale.
+- **Custom Dockerfile instead of `_PIP_ADDITIONAL_REQUIREMENTS`** — the
+  latter reinstalls all deps from scratch on every container start (minutes
+  per boot, got stuck once). `infra/airflow/Dockerfile` bakes them in once.
+
+Run it:
+```bash
+cd infra/airflow
+docker compose up airflow-init   # one-time
+docker compose up -d
+# open http://localhost:8080 (airflow / airflow), trigger skillbridge_pipeline
+```
+Verified: all 4 tasks succeed in ~12s. Screenshot the green DAG graph
+(Grid or Graph view) for your report.
+
+The original plan (kept for reference):
 
 **Steps:**
 1. Get Docker Desktop running (needed for everything below).

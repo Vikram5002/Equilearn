@@ -97,6 +97,16 @@ Open `http://localhost:8080` (user/pass: `airflow` / `airflow`), the
 `skillbridge_pipeline` DAG runs the same 5 steps above as one sequential DAG.
 Trigger it from the UI or: `docker compose exec airflow-scheduler airflow dags trigger skillbridge_pipeline`.
 
+## Streaming simulation (Kafka)
+
+```bash
+cd infra/kafka && docker compose up -d && cd ../..
+python -m src.ingestion.kafka_consumer --timeout 30   # terminal 1
+python -m src.ingestion.kafka_producer --delay 0.5     # terminal 2
+```
+Simulates a live job-postings feed (not real scraping - see ARCHITECTURE.md)
+and runs skill extraction on each posting as it arrives.
+
 ## Tests
 
 ```bash

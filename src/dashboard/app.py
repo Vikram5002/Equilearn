@@ -90,6 +90,24 @@ def main():
             pct = row["pct_postings"].iloc[0] if not row.empty else 0
             st.write(f"- **{skill}** — in {pct:.0%} of job postings")
 
+    st.subheader("Find Real Postings for a Missing Skill")
+    try:
+        from src.features.index_to_elasticsearch import search_by_skill
+
+        skill_choice = st.selectbox("Search postings asking for:", missing[:10] if missing else ["-"])
+        if missing and st.button("Search"):
+            hits = search_by_skill(skill_choice)
+            if hits:
+                for hit in hits:
+                    st.write(f"- **{hit['title']}** @ {hit['company']}")
+            else:
+                st.info("No postings found (is Elasticsearch running and indexed?)")
+    except Exception:
+        st.caption(
+            "Skill search unavailable (Elasticsearch not running). "
+            "See docs/STRETCH_GOALS.md step 4."
+        )
+
     st.subheader("Overall Market Skill Demand")
     top_market = market.head(20)
     fig = px.bar(

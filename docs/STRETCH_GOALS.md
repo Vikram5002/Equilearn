@@ -147,7 +147,13 @@ in ARCHITECTURE.md.
 
 ---
 
-## 5. Push to AWS S3 (Month 4 — do this last, costs nothing if scoped right)
+## 5. Push to AWS S3 — ✅ DONE
+
+Bucket `skillbridge-analytics-vikram` created, `src/ingestion/push_to_s3.py`
+uploads the 5 processed pipeline outputs to `s3://<bucket>/skillbridge/latest/`.
+Verified with `aws s3 ls`. Run: `python -m src.ingestion.push_to_s3 --bucket skillbridge-analytics-vikram`.
+
+The original plan (kept for reference):
 
 **Do not paste AWS keys into a chat with me or anyone.** Steps to do yourself:
 

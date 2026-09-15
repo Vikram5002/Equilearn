@@ -107,6 +107,15 @@ python -m src.ingestion.kafka_producer --delay 0.5     # terminal 2
 Simulates a live job-postings feed (not real scraping - see ARCHITECTURE.md)
 and runs skill extraction on each posting as it arrives.
 
+## Cloud storage (S3)
+
+```bash
+python -m src.ingestion.push_to_s3 --bucket skillbridge-analytics-vikram
+```
+Uploads processed tables + trained model to S3. Uses whatever AWS credentials
+are already configured locally (`aws configure`) - not required for the rest
+of the pipeline to work.
+
 ## Tests
 
 ```bash

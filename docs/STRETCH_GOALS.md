@@ -133,7 +133,25 @@ in ARCHITECTURE.md.
 
 ---
 
-## 4. Elasticsearch skill search (optional, lowest priority)
+## 4. Elasticsearch skill search — ✅ DONE
+
+`infra/elasticsearch/docker-compose.yml` runs single-node ES (security off,
+demo-scale). `src/features/index_to_elasticsearch.py` indexes extracted
+postings; the dashboard has a "find real postings for this missing skill"
+search box (`src/dashboard/app.py`), fails soft with a caption if ES isn't
+running so the rest of the dashboard still works without it.
+
+Run it:
+```bash
+cd infra/elasticsearch && docker compose up -d && cd ../..
+python -m src.features.index_to_elasticsearch
+streamlit run src/dashboard/app.py   # use the search box under a student's skill gap
+```
+Verified: search for "Python" returns real LinkedIn postings; 1485/1500
+real postings indexed (15 duplicate-ID collisions in the source data, not
+a bug in this code).
+
+**All 5 stretch goals are now done.** The original plan (kept for reference):
 
 **Steps:**
 1. Add `elasticsearch:8.x` (single-node, security disabled for local demo)

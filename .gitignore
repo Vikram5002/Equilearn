@@ -16,3 +16,9 @@ data/raw/students/*
 *.egg-info/
 .DS_Store
 dashboard_cache/
+infra/airflow/logs/*
+!infra/airflow/logs/.gitkeep
+infra/airflow/plugins/*
+!infra/airflow/plugins/.gitkeep
+infra/airflow/config/*
+!infra/airflow/config/.gitkeep

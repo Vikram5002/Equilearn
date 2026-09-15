@@ -23,6 +23,9 @@ plotly
 # Orchestration (stretch goal, Month 2+)
 # apache-airflow  # install separately via Docker - heavy dependency tree
 
+# Streaming (stretch goal, Month 4) - see infra/kafka/docker-compose.yml
+kafka-python
+
 # AWS (Month 4 - only when we actually push to S3)
 boto3
 

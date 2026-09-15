@@ -83,6 +83,20 @@ in `src/ingestion/load_kaggle_data.py`) — call this out in your report as a
 proxy, not observed data. Everything else (CGPA proxy, placement outcome,
 job posting descriptions) is real.
 
+## Orchestration (Airflow)
+
+The pipeline is also wired up as an Airflow DAG under `infra/airflow/`:
+
+```bash
+cd infra/airflow
+docker compose up airflow-init   # one-time: migrate db, create admin user
+docker compose up -d
+```
+
+Open `http://localhost:8080` (user/pass: `airflow` / `airflow`), the
+`skillbridge_pipeline` DAG runs the same 5 steps above as one sequential DAG.
+Trigger it from the UI or: `docker compose exec airflow-scheduler airflow dags trigger skillbridge_pipeline`.
+
 ## Tests
 
 ```bash

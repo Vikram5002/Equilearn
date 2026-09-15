@@ -89,7 +89,26 @@ The original plan (kept for reference):
 
 ---
 
-## 3. Local Kafka streaming simulation (Month 4 stretch)
+## 3. Local Kafka streaming simulation — ✅ DONE
+
+`infra/kafka/docker-compose.yml` runs a single-broker Kafka in KRaft mode
+(no Zookeeper). `src/ingestion/kafka_producer.py` replays job postings onto
+the `job-postings` topic with a delay; `src/ingestion/kafka_consumer.py`
+runs the same `extract_skills()` used by the batch pipeline on each message
+as it arrives, writing to `data/processed/job_postings_skills_streaming.csv`.
+
+Run it:
+```bash
+cd infra/kafka && docker compose up -d && cd ../..
+python -m src.ingestion.kafka_consumer --timeout 30   # run first, in one terminal
+python -m src.ingestion.kafka_producer --delay 0.5     # then this, in another
+```
+Verified: 10 messages produced, all 10 consumed and skill-extracted in real time.
+
+Swap-to-real-feed stretch (not done): replace the CSV read in
+`kafka_producer.py` with an Adzuna API poll - the consumer side is unchanged.
+
+The original plan (kept for reference):
 
 Do this instead of ever touching LinkedIn/Naukri scraping — see legal note
 in ARCHITECTURE.md.

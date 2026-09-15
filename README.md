@@ -77,6 +77,12 @@ python -m src.models.train_classifier
 streamlit run src/dashboard/app.py
 ```
 
+**Caution**: the Airflow DAG's `ingest_data` task calls
+`generate_synthetic_data`, so triggering the DAG (or re-running the local
+quickstart) overwrites `data/raw/` back to synthetic data. If you've switched
+to real data, re-run `python -m src.ingestion.load_kaggle_data` afterward to
+restore it before retraining/pushing to S3.
+
 Note: the campus-placement dataset has no skills field, so student skills are
 *imputed* from degree/specialisation (see `SPECIALISATION_SKILLS`/`DEGREE_SKILLS`
 in `src/ingestion/load_kaggle_data.py`) — call this out in your report as a
@@ -115,6 +121,15 @@ python -m src.ingestion.push_to_s3 --bucket skillbridge-analytics-vikram
 Uploads processed tables + trained model to S3. Uses whatever AWS credentials
 are already configured locally (`aws configure`) - not required for the rest
 of the pipeline to work.
+
+## Skill search (Elasticsearch)
+
+```bash
+cd infra/elasticsearch && docker compose up -d && cd ../..
+python -m src.features.index_to_elasticsearch
+```
+Adds a "find real postings for this missing skill" search box to the
+dashboard. Optional - the dashboard works fine without it.
 
 ## Tests
 

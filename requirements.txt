@@ -26,6 +26,9 @@ plotly
 # Streaming (stretch goal, Month 4) - see infra/kafka/docker-compose.yml
 kafka-python
 
+# Skill search (stretch goal) - see infra/elasticsearch/docker-compose.yml
+elasticsearch
+
 # AWS (Month 4 - only when we actually push to S3)
 boto3
 

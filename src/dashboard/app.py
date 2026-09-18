@@ -11,12 +11,26 @@ import plotly.express as px
 import streamlit as st
 
 ROOT = Path(__file__).resolve().parents[2]
+JOB_POSTINGS = ROOT / "data" / "raw" / "job_postings" / "job_postings.csv"
 STUDENTS = ROOT / "data" / "raw" / "students" / "students.csv"
 GAPS = ROOT / "data" / "processed" / "student_skill_gaps.csv"
 MARKET_DEMAND = ROOT / "data" / "processed" / "market_skill_demand.csv"
 MODEL = ROOT / "data" / "processed" / "placement_model.joblib"
 
 st.set_page_config(page_title="SkillBridge Analytics", layout="wide")
+
+JOB_POSTING_REQUIRED_COLS = ["title", "company", "description"]
+STUDENT_REQUIRED_COLS = ["cgpa", "projects_count", "certifications_count", "internships_count", "skills"]
+
+
+def _validate_and_prepare(df: pd.DataFrame, required_cols: list, id_col: str, id_prefix: str) -> tuple:
+    missing_cols = [c for c in required_cols if c not in df.columns]
+    if missing_cols:
+        return None, f"Missing required column(s): {', '.join(missing_cols)}"
+    if id_col not in df.columns:
+        df = df.copy()
+        df[id_col] = [f"{id_prefix}{i:04d}" for i in range(len(df))]
+    return df, None
 
 
 @st.cache_data
@@ -53,6 +67,69 @@ def main():
         "MVP demo running on a static/synthetic job-postings dataset. "
         "See ARCHITECTURE.md for the production data-source plan."
     )
+
+    with st.sidebar.expander("Upload your own data", expanded=False):
+        st.caption(
+            "Job postings CSV needs columns: title, company, description "
+            "(posting_id optional, auto-generated if missing)."
+        )
+        jd_file = st.file_uploader("Job postings (JD) CSV", type="csv", key="jd_upload")
+
+        st.caption(
+            "Students CSV needs: cgpa, projects_count, certifications_count, "
+            "internships_count, skills (semicolon-separated, e.g. 'Python;SQL;Teamwork'). "
+            "student_id optional, auto-generated. Leave out 'placed' for students "
+            "still awaiting placement — retraining is skipped without it."
+        )
+        student_file = st.file_uploader("Students CSV", type="csv", key="student_upload")
+
+        if st.button("Process uploaded data", disabled=not (jd_file or student_file)):
+            errors = []
+            if jd_file:
+                jd_df, err = _validate_and_prepare(
+                    pd.read_csv(jd_file), JOB_POSTING_REQUIRED_COLS, "posting_id", "JP"
+                )
+                if err:
+                    errors.append(f"Job postings: {err}")
+                else:
+                    JOB_POSTINGS.parent.mkdir(parents=True, exist_ok=True)
+                    jd_df.to_csv(JOB_POSTINGS, index=False)
+
+            if student_file:
+                st_df, err = _validate_and_prepare(
+                    pd.read_csv(student_file), STUDENT_REQUIRED_COLS, "student_id", "S"
+                )
+                if err:
+                    errors.append(f"Students: {err}")
+                else:
+                    STUDENTS.parent.mkdir(parents=True, exist_ok=True)
+                    st_df.to_csv(STUDENTS, index=False)
+
+            if errors:
+                for e in errors:
+                    st.error(e)
+            else:
+                with st.spinner("Running skill extraction + feature store..."):
+                    from src.nlp import skill_extractor
+                    from src.features import build_feature_store
+
+                    skill_extractor.main()
+                    build_feature_store.main()
+
+                retrain = student_file and "placed" in pd.read_csv(STUDENTS).columns
+                if retrain:
+                    with st.spinner("Retraining classifier (placed column found)..."):
+                        from src.models import train_classifier
+                        train_classifier.main()
+                    load_model.clear()
+
+                load_data.clear()
+                st.success(
+                    "Processed. "
+                    + ("Model retrained. " if retrain else "Using existing model for predictions. ")
+                    + "Reloading..."
+                )
+                st.rerun()
 
     students, gaps, market = load_data()
     bundle = load_model()

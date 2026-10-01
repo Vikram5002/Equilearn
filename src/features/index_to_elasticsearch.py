@@ -49,7 +49,8 @@ def main(es_url="http://localhost:9200"):
 
 
 def search_by_skill(skill: str, size=5, es_url="http://localhost:9200"):
-    es = Elasticsearch(es_url)
+    # fail fast when ES isn't running - the dashboard falls back to local data
+    es = Elasticsearch(es_url, request_timeout=2, max_retries=0, retry_on_timeout=False)
     result = es.search(
         index=INDEX_NAME,
         query={"term": {"extracted_skills": skill}},

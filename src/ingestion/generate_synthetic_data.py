@@ -66,7 +66,7 @@ def generate_job_postings(n=300) -> pd.DataFrame:
             "company": company,
             "description": description,
             # ground-truth skills kept alongside for validating extractor precision/recall
-            "true_skills": ";".join(core + nice),
+            "true_skills": ";".join(core + nice + [soft]),
         })
     return pd.DataFrame(rows)
 

@@ -13,6 +13,7 @@ from pathlib import Path
 import pandas as pd
 import spacy
 from spacy.matcher import PhraseMatcher
+from spacy.util import filter_spans
 
 from src.nlp.skills_taxonomy import flat_skill_list, skill_to_category
 
@@ -41,25 +42,31 @@ def build_matcher(nlp) -> tuple[PhraseMatcher, PhraseMatcher]:
 
 
 def extract_skills(text: str, nlp, matchers) -> list[str]:
+    if not isinstance(text, str) or not text.strip():
+        return []
     lower_matcher, exact_matcher = matchers
     doc = nlp(text)
     matches = lower_matcher(doc) + exact_matcher(doc)
+    # keep only the longest non-overlapping spans, so "AWS Certified Solutions
+    # Architect" doesn't also count as a separate "AWS" mention
+    spans = filter_spans([doc[start:end] for _, start, end in matches])
     # dedupe while preserving the taxonomy's canonical casing
     seen = set()
     skills = []
-    for match_id, start, end in matches:
-        span_text = doc[start:end].text
-        canonical = _canonical(span_text)
+    for span in sorted(spans, key=lambda sp: sp.start):
+        canonical = _canonical(span.text)
         if canonical not in seen:
             seen.add(canonical)
             skills.append(canonical)
     return skills
 
 
+_LOWER_TO_CANONICAL = {s.lower(): s for s in flat_skill_list()}
+
+
 def _canonical(matched_text: str) -> str:
     """Map a case-insensitive match back to the taxonomy's canonical spelling."""
-    lower_to_canonical = {s.lower(): s for s in flat_skill_list()}
-    return lower_to_canonical.get(matched_text.lower(), matched_text)
+    return _LOWER_TO_CANONICAL.get(matched_text.lower(), matched_text)
 
 
 def evaluate(df: pd.DataFrame) -> None:
@@ -77,7 +84,9 @@ def evaluate(df: pd.DataFrame) -> None:
         recall = tp / len(truth) if truth else 0
         precisions.append(precision)
         recalls.append(recall)
-    print(f"Skill extraction sanity check (synthetic data only):")
+    if not precisions:
+        return
+    print("Skill extraction sanity check (synthetic data only):")
     print(f"  mean precision: {sum(precisions) / len(precisions):.2%}")
     print(f"  mean recall:    {sum(recalls) / len(recalls):.2%}")
 
@@ -92,7 +101,7 @@ def main():
     for description in df["description"]:
         skills = extract_skills(description, nlp, matchers)
         extracted_col.append(";".join(skills))
-        category_col.append(";".join(sorted({categories[s] for s in skills})))
+        category_col.append(";".join(sorted({categories.get(s, "Other") for s in skills})))
 
     df["extracted_skills"] = extracted_col
     df["skill_categories"] = category_col

@@ -39,8 +39,14 @@ def build_training_table() -> pd.DataFrame:
 
 
 def train(df: pd.DataFrame):
+    df = df.dropna(subset=FEATURES + ["placed"])
     X = df[FEATURES]
-    y = df["placed"]
+    y = df["placed"].astype(int)
+    if y.nunique() < 2 or y.value_counts().min() < 4:
+        raise ValueError(
+            "Need at least 4 placed and 4 not-placed students to train; "
+            f"got {y.value_counts().to_dict()}"
+        )
     X_train, X_test, y_train, y_test = train_test_split(
         X, y, test_size=0.25, random_state=42, stratify=y
     )

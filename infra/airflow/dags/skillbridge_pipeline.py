@@ -25,7 +25,15 @@ with DAG(
 
     ingest = BashOperator(
         task_id="ingest_data",
-        bash_command=f"cd {PROJECT_DIR} && python -m src.ingestion.generate_synthetic_data",
+        # Prefer the real Kaggle data when it's been downloaded; fall back to
+        # synthetic only when it hasn't, so a DAG run never clobbers real data.
+        bash_command=(
+            f"cd {PROJECT_DIR} && "
+            "if [ -f data/external/Placement_Data_Full_Class.csv ] && "
+            "[ -f data/external/linkedin_job_postings/postings.csv ]; then "
+            "python -m src.ingestion.load_kaggle_data; "
+            "else python -m src.ingestion.generate_synthetic_data; fi"
+        ),
     )
 
     extract_skills = BashOperator(

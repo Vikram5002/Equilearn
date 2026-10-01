@@ -56,6 +56,21 @@ Run in order — each step reads the previous step's output from `data/`:
 | 4 | `src.models.train_classifier` | `data/processed/placement_model.joblib`, `data/processed/model_metrics.json` |
 | 5 | `src.dashboard.app` | Streamlit UI at `localhost:8501` |
 
+Shortcut: just run `streamlit run src/dashboard/app.py` — with no data it
+opens a "Get started" page that generates demo data and runs steps 1–4 for you.
+
+### Dashboard pages
+- **Student 360** — placement-probability gauge with risk tier, KPIs vs cohort
+  median, skill-coverage radar vs cohort, ranked skill gaps, a **what-if
+  simulator** (change CGPA/projects/internships/skills and see the new
+  probability), the single highest-impact skill to learn, and matching postings
+  (Elasticsearch, falling back to the local feature store when ES is offline).
+- **Cohort analytics** — probability distribution, alignment-vs-outlook
+  scatter, most common gaps, and a downloadable intervention list.
+- **Market pulse** — top-N demanded skills, category treemap, full skill table.
+- **Model** — selected model, AUC/accuracy, LogReg vs XGBoost, feature importance.
+- **Data Studio** — upload CSVs (validated), re-run the pipeline, reset to demo data.
+
 ## Using real Kaggle data instead of synthetic
 
 The pipeline has been validated end-to-end on real data too (AUC 0.947 vs.
@@ -77,11 +92,10 @@ python -m src.models.train_classifier
 streamlit run src/dashboard/app.py
 ```
 
-**Caution**: the Airflow DAG's `ingest_data` task calls
-`generate_synthetic_data`, so triggering the DAG (or re-running the local
-quickstart) overwrites `data/raw/` back to synthetic data. If you've switched
-to real data, re-run `python -m src.ingestion.load_kaggle_data` afterward to
-restore it before retraining/pushing to S3.
+**Note**: the Airflow DAG's `ingest_data` task uses the real Kaggle loader
+whenever both source files exist in `data/external/`, and only falls back to
+synthetic data when they don't. Re-running the *local* quickstart's step 1
+still overwrites `data/raw/` with synthetic data.
 
 Note: the campus-placement dataset has no skills field, so student skills are
 *imputed* from degree/specialisation (see `SPECIALISATION_SKILLS`/`DEGREE_SKILLS`

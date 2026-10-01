@@ -80,13 +80,15 @@ dashboard. Verified: 1485/1500 real postings indexed, search tested.
 credentials are already configured locally (never hardcoded). Verified via
 `aws s3 ls`.
 
-### 1.10 Known gotcha (documented, not a bug to fix)
-The Airflow DAG's `ingest_data` task calls the **synthetic** generator, so
-triggering the DAG overwrites `data/raw/` back to synthetic data. If you've
-switched to real data (§1.1), re-run
-`python -m src.ingestion.load_kaggle_data` afterward before retraining or
-pushing to S3. This bit us once already (a synthetic-data model got pushed
-to S3 by mistake) — see the commit history for the fix.
+### 1.10 Airflow ingest (fixed)
+The DAG's `ingest_data` task now runs the real Kaggle loader when
+`data/external/` has both source files, and only falls back to synthetic
+data otherwise — so a DAG run no longer overwrites real data.
+
+### 1.11 Tests
+25 tests (`pytest tests/`): NLP extractor, feature store edge cases, upload
+validation, classifier guards, and Streamlit `AppTest` smoke tests that render
+every dashboard page (skipped until the pipeline has been run once).
 
 ---
 
@@ -103,7 +105,7 @@ turns a working repo into a gradeable deliverable.
 | 4 | **Decide live demo vs. recorded video** | Given how many Docker services are involved (Airflow, Kafka, Elasticsearch, Postgres), a **recorded backup video** is strongly recommended even if you also plan to demo live — one Docker hiccup shouldn't sink the presentation. |
 | 5 | **Rehearse the demo end-to-end at least twice** | Cold-start all containers, confirm nothing broke since last run (see the Airflow/synthetic-data gotcha above), time it. |
 | 6 | **Re-verify all Docker services boot cleanly** | Time has passed since these were last tested; do a full `docker compose down` + `up` cycle on all three (`infra/airflow`, `infra/kafka`, `infra/elasticsearch`) before demo day, not on demo day. |
-| 7 | **Optional polish (only if time remains)** | More test coverage (currently 3 tests, all on the NLP extractor); dashboard error handling if a service is down (ES search already fails soft — Kafka/Airflow demos don't need dashboard integration); Adzuna API swap for the Kafka producer (documented but not implemented — see STRETCH_GOALS.md §3). |
+| 7 | **Optional polish (only if time remains)** | More test coverage (now 25 tests incl. dashboard smoke tests); dashboard error handling if a service is down (ES search already fails soft — Kafka/Airflow demos don't need dashboard integration); Adzuna API swap for the Kafka producer (documented but not implemented — see STRETCH_GOALS.md §3). |
 | 8 | **Submit** | Share the GitHub link (`github.com/Vikram5002/Equilearn`); confirm the professor/evaluator can actually clone and run it (the README's Quickstart is the test — try it on a machine that hasn't seen this project before, if possible). |
 
 ### Suggested order for the remaining ~week(s)

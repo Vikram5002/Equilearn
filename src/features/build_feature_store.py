@@ -28,7 +28,8 @@ def build_market_skill_demand(job_skills: pd.DataFrame) -> pd.DataFrame:
 
     demand = pd.DataFrame(
         [{"skill": s, "posting_count": c, "pct_postings": c / n_postings}
-         for s, c in skill_counts.items()]
+         for s, c in skill_counts.items()],
+        columns=["skill", "posting_count", "pct_postings"],
     ).sort_values("posting_count", ascending=False).reset_index(drop=True)
     return demand
 
@@ -41,13 +42,15 @@ def build_student_skill_gaps(students: pd.DataFrame, market_demand: pd.DataFrame
 
     rows = []
     for _, student in students.iterrows():
-        student_skills = set(filter(None, student["skills"].split(";")))
+        raw_skills = student["skills"] if isinstance(student["skills"], str) else ""
+        student_skills = {s.strip() for s in raw_skills.split(";") if s.strip()}
         missing = [s for s in ranked_market_skills if s not in student_skills]
         matched = [s for s in ranked_market_skills if s in student_skills]
 
+        total_demand = sum(demand_lookup.values())
         market_alignment = (
-            sum(demand_lookup.get(s, 0) for s in matched)
-            / sum(demand_lookup.values()) if demand_lookup else 0
+            sum(demand_lookup.get(s, 0) for s in matched) / total_demand
+            if total_demand else 0
         )
 
         rows.append({

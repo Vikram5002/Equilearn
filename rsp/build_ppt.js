@@ -232,7 +232,7 @@ const results = [
   ["0.947", "ROC AUC on real data", C.accent2],
   ["99.2%", "Skill-extraction precision", C.accent1],
   ["1,500", "Real postings indexed in Elasticsearch", C.accent5],
-  ["30", "Automated tests, all passing", C.accent4],
+  ["31", "Automated tests, all passing", C.accent4],
 ];
 results.forEach(([big, lbl, col], i) => {
   const x = 0.5 + i * 2.3;

@@ -54,3 +54,28 @@ def test_market_role_filter(role):
     at = _run("page_market")
     at.text_input(key="role_filter").set_value(role).run()
     assert not at.exception, [e.value for e in at.exception]
+
+
+class _BrokenModel:  # mimics a model pickled under a different scikit-learn
+    def predict_proba(self, X):
+        raise AttributeError("'LogisticRegression' object has no attribute 'multi_class'")
+
+
+class _IdentityScaler:
+    def transform(self, X):
+        return X
+
+
+def test_incompatible_model_fails_soft(tmp_path, monkeypatch):
+    import joblib
+
+    from src.dashboard import app
+
+    bad = tmp_path / "model.joblib"
+    joblib.dump({"model": _BrokenModel(), "scaler": _IdentityScaler(), "features": ["cgpa"]}, bad)
+    monkeypatch.setattr(app, "MODEL", bad)
+    app.load_model.clear()
+    try:
+        assert app.load_model() is None
+    finally:
+        app.load_model.clear()

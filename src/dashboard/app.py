@@ -62,7 +62,23 @@ def load_postings():
 
 @st.cache_resource(show_spinner=False)
 def load_model():
-    return joblib.load(MODEL) if MODEL.exists() else None
+    if not MODEL.exists():
+        return None
+    try:
+        bundle = joblib.load(MODEL)
+        # smoke-test: a model pickled under a different scikit-learn/xgboost
+        # version (e.g. trained inside the Airflow container) can load fine
+        # and then fail on predict
+        probe = pd.DataFrame([[0.0] * len(bundle["features"])], columns=bundle["features"])
+        predict_proba(bundle, probe)
+        return bundle
+    except Exception as e:
+        st.warning(
+            f"Saved model couldn't be used ({type(e).__name__}) — probably trained with a different "
+            "library version. Re-train it from **Data Studio → Re-run full pipeline**.",
+            icon=":material/warning:",
+        )
+        return None
 
 
 @st.cache_data(show_spinner=False)

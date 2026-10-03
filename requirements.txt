@@ -8,8 +8,9 @@ pyarrow
 spacy
 
 # ML
-scikit-learn
-xgboost
+scikit-learn==1.7.2  # keep identical in requirements.txt and infra/airflow/requirements-airflow.txt:
+                     # the model is pickled, so the dashboard must load it with the same version that trained it
+xgboost==3.2.0
 joblib
 
 # Dashboard

@@ -26,22 +26,29 @@ FILES_TO_PUSH = [
 ]
 
 
+def push(s3, bucket: str, prefix: str, processed_dir: Path = PROCESSED_DIR) -> list[str]:
+    """Uploads whichever FILES_TO_PUSH exist; returns the S3 keys written."""
+    prefix = prefix.strip("/")
+    uploaded = []
+    for filename in FILES_TO_PUSH:
+        path = processed_dir / filename
+        if not path.exists():
+            print(f"Skipping {filename} (not found - run the pipeline first)")
+            continue
+        key = f"{prefix}/{filename}" if prefix else filename
+        s3.upload_file(str(path), bucket, key)
+        print(f"Uploaded {filename} -> s3://{bucket}/{key}")
+        uploaded.append(key)
+    return uploaded
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--bucket", required=True)
     parser.add_argument("--prefix", default="skillbridge/latest")
     args = parser.parse_args()
 
-    s3 = boto3.client("s3")
-
-    for filename in FILES_TO_PUSH:
-        path = PROCESSED_DIR / filename
-        if not path.exists():
-            print(f"Skipping {filename} (not found - run the pipeline first)")
-            continue
-        key = f"{args.prefix}/{filename}"
-        s3.upload_file(str(path), args.bucket, key)
-        print(f"Uploaded {filename} -> s3://{args.bucket}/{key}")
+    push(boto3.client("s3"), args.bucket, args.prefix)
 
 
 if __name__ == "__main__":

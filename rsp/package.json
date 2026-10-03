@@ -1,0 +1,7 @@
+{
+  "name": "skillbridge-paper",
+  "private": true,
+  "description": "Builds the SkillBridge presentation",
+  "scripts": { "build": "node build_ppt.js" },
+  "dependencies": { "pptxgenjs": "^4.0.1" }
+}

@@ -376,9 +376,9 @@ para(
     "staff upload their own postings and student files, which are validated for required columns, "
     "numeric types and duplicate identifiers before the pipeline is re-run.")
 para(
-    "Correctness is checked by an automated suite of 25 tests. They cover the extractor (canonical "
+    "Correctness is checked by an automated suite of 27 tests. They cover the extractor (canonical "
     "casing, overlap resolution, empty input, ambiguous short names), the feature store (empty postings, "
-    "students with no skills, demand percentages), upload validation, the training guard, and smoke tests "
+    "students with no skills, demand percentages), upload validation, the training guard, Kafka message handling, S3 uploads, and smoke tests "
     "that render every dashboard page against real pipeline outputs.")
 
 # ---------------------------------------------------------------- 6

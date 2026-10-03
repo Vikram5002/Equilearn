@@ -436,8 +436,15 @@ def page_market():
     postings = load_postings()
     st.title(":material/insights: Market pulse")
     st.caption("What employers are actually asking for, extracted from job-posting text with NLP.")
+    role = st.text_input("Filter by job title", placeholder="e.g. Data, Engineer, Analyst — blank for all",
+                         icon=":material/search:", key="role_filter").strip()
+    if role and len(postings):
+        from src.features.build_feature_store import build_market_skill_demand
+        postings = postings[postings["title"].fillna("").str.contains(role, case=False, regex=False)]
+        market = build_market_skill_demand(postings) if len(postings) else market.iloc[0:0]
+        st.caption(f"Showing demand across **{len(postings):,}** postings whose title contains “{role}”.")
     if market.empty:
-        st.warning("No skills extracted from postings.")
+        st.warning("No skills found for this selection.")
         return
 
     cat_of = skill_to_category()
@@ -452,7 +459,8 @@ def page_market():
 
     c1, c2 = st.columns([3, 2])
     with c1, st.container(border=True):
-        top_n = st.slider("Top N skills", 5, min(40, len(market)), min(20, len(market)))
+        top_n = (st.slider("Top N skills", 5, min(40, len(market)), min(20, len(market)))
+                 if len(market) > 5 else len(market))
         fig = px.bar(market.head(top_n), x="pct_postings", y="skill", orientation="h", color="category",
                      labels={"pct_postings": "% of job postings", "skill": ""})
         fig.update_layout(yaxis={"categoryorder": "total ascending"}, xaxis_tickformat=".0%")

@@ -25,6 +25,19 @@ TOPIC = "job-postings"
 FIELDNAMES = ["posting_id", "title", "company", "description", "extracted_skills", "skill_categories"]
 
 
+def process_posting(posting: dict, nlp, matchers, categories) -> dict:
+    """Runs batch-pipeline skill extraction on one streamed posting."""
+    skills = extract_skills(posting.get("description"), nlp, matchers)
+    return {
+        "posting_id": posting.get("posting_id"),
+        "title": posting.get("title"),
+        "company": posting.get("company"),
+        "description": posting.get("description"),
+        "extracted_skills": ";".join(skills),
+        "skill_categories": ";".join(sorted({categories.get(s, "Other") for s in skills})),
+    }
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--bootstrap-servers", default="localhost:9092")
@@ -52,19 +65,11 @@ def main():
         writer.writeheader()
         count = 0
         for message in consumer:
-            posting = message.value
-            skills = extract_skills(posting["description"], nlp, matchers)
-            writer.writerow({
-                "posting_id": posting["posting_id"],
-                "title": posting["title"],
-                "company": posting["company"],
-                "description": posting["description"],
-                "extracted_skills": ";".join(skills),
-                "skill_categories": ";".join(sorted({categories[s] for s in skills})),
-            })
+            row = process_posting(message.value, nlp, matchers, categories)
+            writer.writerow(row)
             f.flush()
             count += 1
-            print(f"  [{count}] {posting['posting_id']}: extracted {skills}")
+            print(f"  [{count}] {row['posting_id']}: extracted {row['extracted_skills'] or '-'}")
 
     print(f"Done - stopped after {args.timeout}s with no new messages. Wrote {count} rows.")
 

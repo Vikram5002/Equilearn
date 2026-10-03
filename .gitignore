@@ -22,3 +22,4 @@ infra/airflow/plugins/*
 !infra/airflow/plugins/.gitkeep
 infra/airflow/config/*
 !infra/airflow/config/.gitkeep
+node_modules/

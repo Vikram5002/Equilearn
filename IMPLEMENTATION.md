@@ -86,7 +86,7 @@ The DAG's `ingest_data` task now runs the real Kaggle loader when
 data otherwise — so a DAG run no longer overwrites real data.
 
 ### 1.11 Tests
-25 tests (`pytest tests/`): NLP extractor, feature store edge cases, upload
+27 tests (`pytest tests/`): NLP extractor, feature store edge cases, upload
 validation, classifier guards, and Streamlit `AppTest` smoke tests that render
 every dashboard page (skipped until the pipeline has been run once).
 
@@ -105,7 +105,7 @@ turns a working repo into a gradeable deliverable.
 | 4 | **Decide live demo vs. recorded video** | Given how many Docker services are involved (Airflow, Kafka, Elasticsearch, Postgres), a **recorded backup video** is strongly recommended even if you also plan to demo live — one Docker hiccup shouldn't sink the presentation. |
 | 5 | **Rehearse the demo end-to-end at least twice** | Cold-start all containers, confirm nothing broke since last run (see the Airflow/synthetic-data gotcha above), time it. |
 | 6 | **Re-verify all Docker services boot cleanly** | Time has passed since these were last tested; do a full `docker compose down` + `up` cycle on all three (`infra/airflow`, `infra/kafka`, `infra/elasticsearch`) before demo day, not on demo day. |
-| 7 | **Optional polish (only if time remains)** | More test coverage (now 25 tests incl. dashboard smoke tests); dashboard error handling if a service is down (ES search already fails soft — Kafka/Airflow demos don't need dashboard integration); Adzuna API swap for the Kafka producer (documented but not implemented — see STRETCH_GOALS.md §3). |
+| 7 | **Optional polish (only if time remains)** | More test coverage (now 27 tests incl. dashboard smoke tests and Kafka/S3 logic); dashboard error handling if a service is down (ES search already fails soft — Kafka/Airflow demos don't need dashboard integration); Adzuna API swap for the Kafka producer (documented but not implemented — see STRETCH_GOALS.md §3). |
 | 8 | **Submit** | Share the GitHub link (`github.com/Vikram5002/Equilearn`); confirm the professor/evaluator can actually clone and run it (the README's Quickstart is the test — try it on a machine that hasn't seen this project before, if possible). |
 
 ### Suggested order for the remaining ~week(s)

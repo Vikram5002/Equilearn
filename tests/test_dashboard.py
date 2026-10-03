@@ -47,3 +47,10 @@ def test_cohort_tier_filter_empty_selection():
     at = _run("page_cohort")
     at.pills[0].set_value([]).run()
     assert not at.exception
+
+
+@pytest.mark.parametrize("role", ["Data", "Engineer", "zzz-no-such-role"])
+def test_market_role_filter(role):
+    at = _run("page_market")
+    at.text_input(key="role_filter").set_value(role).run()
+    assert not at.exception, [e.value for e in at.exception]

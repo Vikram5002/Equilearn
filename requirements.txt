@@ -7,10 +7,6 @@ pyarrow
 # no JVM/licensing overhead, runs reliably on a laptop for a solo 4-month build.
 spacy
 
-# Distributed processing (local mode - no EMR/cluster cost)
-pyspark
-delta-spark
-
 # ML
 scikit-learn
 xgboost
@@ -27,7 +23,7 @@ plotly
 kafka-python
 
 # Skill search (stretch goal) - see infra/elasticsearch/docker-compose.yml
-elasticsearch
+elasticsearch>=8,<9  # must match the 8.x server in infra/elasticsearch
 
 # AWS (Month 4 - only when we actually push to S3)
 boto3

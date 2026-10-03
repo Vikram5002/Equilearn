@@ -22,6 +22,12 @@ JOB_POSTINGS_IN = ROOT / "data" / "raw" / "job_postings" / "job_postings.csv"
 TOPIC = "job-postings"
 
 
+def postings_to_messages(df: pd.DataFrame):
+    """One JSON-safe dict per posting (NaN -> None, which json can't encode as NaN)."""
+    for _, row in df.iterrows():
+        yield row.astype(object).where(pd.notna(row), None).to_dict()
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--bootstrap-servers", default="localhost:9092")
@@ -39,8 +45,7 @@ def main():
     )
 
     print(f"Streaming {len(df)} postings to topic '{TOPIC}' (delay={args.delay}s)...")
-    for _, row in df.iterrows():
-        message = row.where(pd.notna(row), None).to_dict()
+    for message in postings_to_messages(df):
         producer.send(TOPIC, value=message)
         print(f"  sent {message['posting_id']}: {message['title']} @ {message['company']}")
         time.sleep(args.delay)

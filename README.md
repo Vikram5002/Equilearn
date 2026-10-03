@@ -67,7 +67,8 @@ opens a "Get started" page that generates demo data and runs steps 1–4 for you
   (Elasticsearch, falling back to the local feature store when ES is offline).
 - **Cohort analytics** — probability distribution, alignment-vs-outlook
   scatter, most common gaps, and a downloadable intervention list.
-- **Market pulse** — top-N demanded skills, category treemap, full skill table.
+- **Market pulse** — top-N demanded skills, category treemap, full skill table,
+  filterable by job title (e.g. "Data", "Engineer").
 - **Model** — selected model, AUC/accuracy, LogReg vs XGBoost, feature importance.
 - **Data Studio** — upload CSVs (validated), re-run the pipeline, reset to demo data.
 

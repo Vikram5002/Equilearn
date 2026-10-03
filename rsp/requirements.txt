@@ -1,0 +1,4 @@
+# Builds the research paper: python rsp/build_paper.py
+python-docx
+docx2pdf  # PDF conversion uses the installed Microsoft Word
+matplotlib

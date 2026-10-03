@@ -22,7 +22,8 @@ def build_documents(df: pd.DataFrame):
             "_source": {
                 "posting_id": row["posting_id"],
                 "title": row["title"],
-                "company": row["company"],
+                # some real postings have no company; NaN isn't valid JSON and gets rejected
+                "company": row["company"] if pd.notna(row["company"]) else "Unknown company",
                 "extracted_skills": str(row["extracted_skills"]).split(";") if pd.notna(row["extracted_skills"]) else [],
             },
         }

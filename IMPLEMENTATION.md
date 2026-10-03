@@ -72,7 +72,8 @@ correctly in real time.
 ### 1.8 Search — Elasticsearch
 `infra/elasticsearch/` — single-node ES, security disabled (demo-scale).
 `src/features/index_to_elasticsearch.py` indexes postings; wired into the
-dashboard. Verified: 1485/1500 real postings indexed, search tested.
+dashboard. Verified: all 1500/1500 real postings indexed (15 with no company name were
+rejected as invalid JSON until that was fixed), search tested.
 
 ### 1.9 Cloud — AWS S3
 `src/ingestion/push_to_s3.py` uploads the 5 processed pipeline outputs to

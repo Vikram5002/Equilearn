@@ -147,9 +147,10 @@ cd infra/elasticsearch && docker compose up -d && cd ../..
 python -m src.features.index_to_elasticsearch
 streamlit run src/dashboard/app.py   # use the search box under a student's skill gap
 ```
-Verified: search for "Python" returns real LinkedIn postings; 1485/1500
-real postings indexed (15 duplicate-ID collisions in the source data, not
-a bug in this code).
+Verified: search for "Python" returns real LinkedIn postings; 1500/1500
+real postings indexed. (An earlier run indexed only 1485: 15 postings with no
+company name were sent as NaN, which is invalid JSON. Fixed in
+`index_to_elasticsearch.py`.)
 
 **All 5 stretch goals are now done.** The original plan (kept for reference):
 

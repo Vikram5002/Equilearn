@@ -187,7 +187,7 @@ s.addChart(pres.charts.BAR, [{ name: "% of postings",
   labels: market.map(r => r[0]).reverse(), values: market.map(r => +(r[2] * 100).toFixed(1)).reverse() }],
   { x: 4.6, y: 1.2, w: 4.9, h: 3.7, barDir: "bar", chartColors: [HEX.accent1], showValue: true,
     dataLabelPosition: "outEnd", dataLabelFormatCode: "0\"%\"", showLegend: false, showTitle: true,
-    title: "Top skills in postings (synthetic run)", titleFontSize: 12, titleColor: HEX.dk1,
+    title: "Top skills in 1,500 real LinkedIn postings", titleFontSize: 12, titleColor: HEX.dk1,
     valGridLine: { color: "E4E2F5", size: 0.5 }, catGridLine: { style: "none" }, valAxisHidden: true,
     ...chartText, dataLabelColor: HEX.dk1 });
 
@@ -200,12 +200,12 @@ s.addText([
   { text: "CGPA proxy dominates on real data", options: { bullet: true } },
 ], { x: 0.5, y: 3.0, w: 3.8, h: 1.9, fontSize: 14, color: C.text1, paraSpaceAfter: 6, valign: "top", isTextBox: true, margin: 0 });
 s.addChart(pres.charts.BAR, [
-  { name: "ROC AUC", labels: ["Logistic regression", "XGBoost"], values: [0.663, 0.637] },
-  { name: "Accuracy", labels: ["Logistic regression", "XGBoost"], values: [0.62, 0.68] },
+  { name: "ROC AUC", labels: ["Logistic regression", "XGBoost"], values: [0.947, 0.896] },
+  { name: "Accuracy", labels: ["Logistic regression", "XGBoost"], values: [0.833, 0.778] },
 ], { x: 4.6, y: 1.2, w: 4.9, h: 3.7, barDir: "col", barGrouping: "clustered",
   chartColors: [HEX.accent1, HEX.accent2], showValue: true, dataLabelPosition: "outEnd",
   dataLabelFormatCode: "0.00", showLegend: true, legendPos: "b", legendFontFace: "+mn-lt", legendFontSize: 11,
-  showTitle: true, title: "Synthetic data (noisy by design)", titleFontSize: 12, titleColor: HEX.dk1,
+  showTitle: true, title: "Real data: campus placement + LinkedIn", titleFontSize: 12, titleColor: HEX.dk1,
   valAxisMinVal: 0, valAxisMaxVal: 1, valAxisHidden: true, valGridLine: { color: "E4E2F5", size: 0.5 },
   catGridLine: { style: "none" }, ...chartText, dataLabelColor: HEX.dk1 });
 
@@ -231,8 +231,8 @@ s = content("Results at a glance", "Results");
 const results = [
   ["0.947", "ROC AUC on real data", C.accent2],
   ["99.2%", "Skill-extraction precision", C.accent1],
-  ["1,485", "Real postings indexed in Elasticsearch", C.accent5],
-  ["27", "Automated tests, all passing", C.accent4],
+  ["1,500", "Real postings indexed in Elasticsearch", C.accent5],
+  ["30", "Automated tests, all passing", C.accent4],
 ];
 results.forEach(([big, lbl, col], i) => {
   const x = 0.5 + i * 2.3;

@@ -376,7 +376,7 @@ para(
     "staff upload their own postings and student files, which are validated for required columns, "
     "numeric types and duplicate identifiers before the pipeline is re-run.")
 para(
-    "Correctness is checked by an automated suite of 27 tests. They cover the extractor (canonical "
+    "Correctness is checked by an automated suite of 30 tests. They cover the extractor (canonical "
     "casing, overlap resolution, empty input, ambiguous short names), the feature store (empty postings, "
     "students with no skills, demand percentages), upload validation, the training guard, Kafka message handling, S3 uploads, and smoke tests "
     "that render every dashboard page against real pipeline outputs.")
@@ -414,7 +414,7 @@ table("Skill-extraction quality on synthetic postings (mean per posting).",
           ["+ corrected ground truth, longest-span selection", "99.2%", "99.7%"],
       ], [9.0, 3.0, 3.0])
 para(
-    "On the real postings, 1,485 of the 1,500 sampled postings were indexed into Elasticsearch without error; the other 15 were rejected at indexing time. "
+    "On the real postings, an early run indexed only 1,485 of the 1,500 sampled postings: 15 had no company name, and the missing value was serialised as NaN, which is not valid JSON. Substituting a placeholder fixed this, and all 1,500 postings are now indexed. "
     "The case-sensitive rule for Go, C and R was introduced after manual "
     "review of extractions on this real text, which is where the \"go above and beyond\" false positive "
     "first appeared.")
@@ -424,18 +424,24 @@ para(
     "generator adds one soft skill to every posting, soft skills lead this ranking. The figure is "
     "included mainly to show the form of the output. On real data the ranking reflects the sampled "
     "LinkedIn postings and changes whenever new postings are ingested, which is the point of deriving it "
-    "from data instead of fixing it by hand.")
+    "from data instead of fixing it by hand. In the real sample, Communication appeared in 48.6% "
+    "of postings and Leadership in 22.5%, followed by Time Management, Problem Solving and Agile; the "
+    "most requested technical skills were SQL (4.1%) and Python (3.2%).")
 figure(FIG / "fig2_market_demand.png", "Top fifteen skills by share of postings (synthetic configuration).", 13)
 h2("D. Placement prediction")
 para("Table 3 summarises held-out performance for both configurations.")
 table("Held-out classification performance.", ["Configuration", "Model", "ROC AUC", "Accuracy"], [
-    ["Real (campus + LinkedIn)", "Selected model", "0.947", "—"],
+    ["Real (campus + LinkedIn)", "Logistic regression (selected)", "0.947", "83.3%"],
+    ["Real (campus + LinkedIn)", "XGBoost", "0.896", "77.8%"],
     ["Synthetic", "Logistic regression (selected)", "0.663", "62.0%"],
     ["Synthetic", "XGBoost", "0.637", "68.0%"],
 ], [5.0, 5.4, 2.4, 2.4])
 para(
-    "On the real configuration the selected model reached an AUC of 0.947. The CGPA proxy was the "
-    "dominant feature, which is expected for this dataset, where placement outcomes "
+    "On the real configuration logistic regression was selected with an AUC of 0.947 and an accuracy "
+    "of 83.3%, ahead of XGBoost (AUC 0.896). The CGPA proxy was by far the largest standardised "
+    "coefficient (2.24), followed by internships (0.69); the alignment score contributed little (0.08), "
+    "and projects and certifications carried no weight because the source data does not record them. "
+    "This is expected for this dataset, where placement outcomes "
     "are driven mainly by academic record and work experience. The high AUC should therefore be read as "
     "a property of this dataset rather than as proof that the skill features are strongly predictive. "
     "Because the skills were imputed from specialisation, they carry little information that the model "

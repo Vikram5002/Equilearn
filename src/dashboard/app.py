@@ -351,6 +351,14 @@ def page_student():
                                   xaxis={"tickformat": "+.1%", "title": "Δ placement probability"},
                                   coloraxis_showscale=False)
                 st.plotly_chart(_style(fig, 320), width="stretch", config={"displayModeBar": False})
+                if lever_df["Gain"].max() <= 0:
+                    st.info(
+                        "The current model doesn't reward extra skills — on this dataset its skill "
+                        "features carry little or negative weight (see **Model**). That usually means the "
+                        "training data has no real skill records (e.g. skills imputed from specialisation); "
+                        "retrain on data with real student skills before using this ranking for advice.",
+                        icon=":material/info:",
+                    )
 
     with tab_jobs:
         if not missing:

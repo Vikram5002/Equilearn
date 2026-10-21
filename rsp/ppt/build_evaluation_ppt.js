@@ -11,6 +11,21 @@ const ROOT = path.join(HERE, "..", "..");
 const OUT = path.join(HERE, "SkillBridge_Evaluation.pptx");
 const SHOT = (n) => path.join(HERE, "screens", `${n}.png`);
 const FIG = (n) => path.join(HERE, "..", "figures", n);
+const FLOW = (n) => path.join(HERE, "screens", `flow_${n}`); // cropped by crop_flows.py
+// PNG width/height straight from the IHDR header, so diagrams keep their aspect ratio
+const pngSize = (f) => { const b = fs.readFileSync(f); return [b.readUInt32BE(16), b.readUInt32BE(20)]; };
+function fitImage(s, file, bx, by, bw, bh, altText) {
+  const [w, h] = pngSize(file);
+  const k = Math.min(bw / w, bh / h), iw = w * k, ih = h * k;
+  s.addImage({ path: file, x: bx + (bw - iw) / 2, y: by + (bh - ih) / 2, w: iw, h: ih, altText });
+}
+function flowSlide(title, file, note) {
+  const s = content(title);
+  fitImage(s, file, 0.3, 1.0, 9.4, note ? 3.85 : 4.15, title);
+  if (note) s.addText(note, { x: 0.5, y: 4.82, w: 9, h: 0.35, fontSize: 12, color: C.accent6,
+    align: "center", margin: 0, isTextBox: true });
+  return s;
+}
 
 const THEME = {
   name: "SkillBridge",
@@ -183,10 +198,8 @@ bullets(s, ["Ground-truth skills allow exact precision/recall", "Used to test th
   { x: 5.45, y: 3.45, w: 3.85, h: 1.35, fontSize: 13 });
 s.addNotes("We deliberately avoided scraping LinkedIn/Naukri because of their terms of service; both datasets are public on Kaggle.");
 
-s = content("System architecture");
-s.addImage({ path: FIG("fig1_architecture.png"), x: 0.9, y: 1.1, w: 8.2, h: 3.42, altText: "Architecture diagram" });
-s.addText("Each stage reads the previous stage's output — every stage runs and is tested on its own.",
-  { x: 0.5, y: 4.6, w: 9, h: 0.4, fontSize: 13, color: C.accent6, align: "center", margin: 0, isTextBox: true });
+flowSlide("Project flow", FLOW("1_project_flow.png"),
+  "Each stage reads the previous stage's output; Airflow runs the four stages in order.");
 
 s = content("Technology choices");
 const stack = [
@@ -205,6 +218,17 @@ s.addTable([
     bold: j === 0, fill: { color: i % 2 ? HEX.lt1 : HEX.lt2 } } }))),
 ], { x: 0.5, y: 1.15, w: 9, colW: [2.6, 1.6, 4.8], fontSize: 12, color: HEX.dk1,
   border: { type: "solid", pt: 0.5, color: "E4E2F5" }, rowH: 0.44, valign: "middle" });
+
+s = content("Tech stack flow");
+fitImage(s, FLOW("2_techstack_flow.png"), 0.3, 1.0, 5.6, 4.15, "Tech stack flow");
+s.addText("Read top to bottom", { x: 6.2, y: 1.15, w: 3.3, h: 0.45, fontSize: 16, bold: true,
+  color: C.accent1, margin: 0, isTextBox: true });
+bullets(s, [
+  "Each layer feeds the one below it",
+  "Kafka, Elasticsearch and Airflow run in Docker",
+  "ML library versions pinned so models trained in Airflow load in the dashboard",
+  "31 pytest tests guard every layer",
+], { x: 6.2, y: 1.7, w: 3.3, h: 3.2, fontSize: 13 });
 
 // ================================================================== METHODS
 newSection("Methodology");
@@ -286,6 +310,8 @@ bullets(s, [
 
 // ================================================================== LIVE SYSTEM
 newSection("Live system");
+flowSlide("Scenario: helping student S0001", FLOW("3_scenario_flow.png"),
+  "The next slides show each of these steps in the running dashboard.");
 shotSlide("Dashboard — Student 360", SHOT("student"), "One student, one page", [
   "Placement probability gauge with risk tier",
   "KPIs compared with the cohort median",
@@ -321,6 +347,7 @@ shotSlide("Dashboard — Data Studio", SHOT("data"), "Bring your own data", [
 
 // ================================================================== QUALITY
 newSection("Testing & quality");
+flowSlide("Development flow", FLOW("4_development_flow.png"));
 s = content("Testing");
 stat(s, 0.5, 1.3, 3.0, "31", "automated tests, all passing on real data", C.accent2, 54);
 bullets(s, [
